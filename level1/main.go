@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"strings"
 )
 
@@ -81,33 +82,28 @@ func getMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (messa
 		return "error"
 	}
 
-	partsMessage := collectPartsMessage(kenobiMessages, skywalkerMessages, satoMessages)
-	resultMessage := processPartsMessage(partsMessage)
+	resultMessage := processPartsMessage(kenobiMessages, skywalkerMessages, satoMessages)
 
 	return resultMessage
 }
 
-func collectPartsMessage(kenobiMessages, skywalkerMessages, satoMessages []string) []string {
-	inputMessages := make([]string, 0, len(kenobiMessages)+len(skywalkerMessages)+len(satoMessages))
-	inputMessages = append(inputMessages, kenobiMessages...)
-	inputMessages = append(inputMessages, skywalkerMessages...)
-	inputMessages = append(inputMessages, satoMessages...)
-	return inputMessages
+func processPartsMessage(kenobiMessages, skywalkerMessages, satoMessages []string) string {
+	keys := make(map[string]bool)
+	var buffer bytes.Buffer
+
+	for i := range kenobiMessages {
+		addPart(kenobiMessages[i], keys, &buffer)
+		addPart(skywalkerMessages[i], keys, &buffer)
+		addPart(satoMessages[i], keys, &buffer)
+	}
+	return strings.Trim(buffer.String(), " ")
 }
 
-func processPartsMessage(messages []string) string {
-	keys := make(map[string]bool)
-	result := []string{}
-
-	for _, entry := range messages {
-		if entry == "" {
-			continue
-		}
-
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			result = append(result, entry)
+func addPart(part string, keys map[string]bool, buffer *bytes.Buffer) {
+	if part != "" {
+		if _, value := keys[part]; !value {
+			keys[part] = true
+			buffer.WriteString(part + " ")
 		}
 	}
-	return strings.Join(result, " ")
 }
