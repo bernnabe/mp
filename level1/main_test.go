@@ -20,9 +20,10 @@ func TestWhenMessageIsIncomplete(t *testing.T) {
 
 	var result string
 
-	result = getMessage(kenobi, skywalker, sato)
+	result, err := GetMessage(kenobi, skywalker, sato)
 
-	assert.EqualValues(t, "error", result)
+	assert.NotNil(t, err)
+	assert.EqualValues(t, "", result)
 }
 
 func TestWhenMessageIsWellFormed(t *testing.T) {
@@ -32,8 +33,9 @@ func TestWhenMessageIsWellFormed(t *testing.T) {
 
 	var result string
 
-	result = getMessage(kenobi, skywalker, sato)
+	result, err := GetMessage(kenobi, skywalker, sato)
 
+	assert.Nil(t, err)
 	assert.EqualValues(t, "este es un mensaje", result)
 }
 
@@ -43,7 +45,8 @@ func TestWhenRandomHelloMessage(t *testing.T) {
 	sato := []string{"", "Hola2", "Hola3", "Hola4", ""}
 	var result string
 
-	result = getMessage(kenobi, skywalker, sato)
+	result, err := GetMessage(kenobi, skywalker, sato)
 
+	assert.Nil(t, err)
 	assert.EqualValues(t, "Hola1 Hola2 Hola3 Hola4 Hola5", result)
 }

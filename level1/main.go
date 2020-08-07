@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 )
 
@@ -75,16 +76,17 @@ func getPosition(kenobiDistance, skywalkerDistance, satoDistance float32) (x, y 
 	return float32(result[0].X), float32(result[1].Y)
 }
 
-func getMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string) {
+// GetMessage Procesa los mensajes recibidos en cada satelite
+// input: Mensajes tal cual se reciben en cada satelite
+// output:  Mensaje tal cual fué enviado desde el emisor.
+func GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error) {
 	validStructures := len(kenobiMessages) == len(skywalkerMessages) && len(kenobiMessages) == len(satoMessages)
 
 	if !validStructures {
-		return "error"
+		return "", errors.New("Message bad formed")
 	}
 
-	resultMessage := processPartsMessage(kenobiMessages, skywalkerMessages, satoMessages)
-
-	return resultMessage
+	return processPartsMessage(kenobiMessages, skywalkerMessages, satoMessages), nil
 }
 
 func processPartsMessage(kenobiMessages, skywalkerMessages, satoMessages []string) string {
@@ -106,16 +108,5 @@ func processPartsMessage(kenobiMessages, skywalkerMessages, satoMessages []strin
 		addPart(satoMessages[i], keys, &buffer)
 	}
 
-	return strings.Trim(buffer.String(), " ")
+	return strings.TrimRight(buffer.String(), " ")
 }
-
-/*
-func addPart(part string, keys map[string]bool, buffer *bytes.Buffer) {
-	if part != "" {
-		if _, value := keys[part]; !value {
-			keys[part] = true
-			buffer.WriteString(part + " ")
-		}
-	}
-}
-*/
