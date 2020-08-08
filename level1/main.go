@@ -71,7 +71,6 @@ func postTopSecret(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &request)
 
 	x, y, error := getPosition(request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
-	position := Position{X: x, Y: y}
 
 	if error != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -83,14 +82,14 @@ func postTopSecret(w http.ResponseWriter, r *http.Request) {
 
 	if error != nil {
 		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w)
 		return
 	}
 
-	var response TopSecretResponse
-	response.Message = message
-	response.Position = position
-
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(TopSecretResponse{
+		Message:  message,
+		Position: Position{X: x, Y: y},
+	})
 }
 
 // GetMessage Procesa los mensajes recibidos en cada satelite
