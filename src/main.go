@@ -59,7 +59,6 @@ func handleRequests() {
 
 func home(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the Api")
-	fmt.Println("Endpoint Hit: homePage")
 }
 
 func postTopSecret(w http.ResponseWriter, r *http.Request) {
@@ -102,10 +101,10 @@ func GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (messa
 		return "", errors.New("message isn't well formed")
 	}
 
-	return processPartsMessage(kenobiMessages, skywalkerMessages, satoMessages), nil
+	return processMessageParts(kenobiMessages, skywalkerMessages, satoMessages), nil
 }
 
-func processPartsMessage(kenobiMessages, skywalkerMessages, satoMessages []string) string {
+func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []string) string {
 	keys := make(map[string]bool)
 	var buffer bytes.Buffer
 
