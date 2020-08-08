@@ -7,8 +7,9 @@ import (
 )
 
 func TestGetPosition(t *testing.T) {
-	x, y := getPosition(25, 9, 25)
+	x, y, err := getPosition(25, 9, 25)
 
+	assert.Nil(t, err)
 	assert.Equal(t, x, 5)
 	assert.Equal(t, y, 7)
 }
