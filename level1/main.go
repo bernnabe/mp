@@ -13,35 +13,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func main() {
-	handleRequests()
-}
-
-func handleRequests() {
-	myRouter := mux.NewRouter().StrictSlash(true)
-	myRouter.HandleFunc("/", home)
-	myRouter.HandleFunc("/topsecret", receiveMessage).Methods("POST")
-
-	log.Fatal(http.ListenAndServe(":8080", myRouter))
-}
-
-func home(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the Api")
-	fmt.Println("Endpoint Hit: homePage")
-}
-
 //Distance is a model
 type Distance struct {
-	Kenobi    float64 `json:kenobi`
-	Skywalker float64 `json:skywalker`
-	Sato      float64 `json:soto`
+	Kenobi    float64 `json:"kenobi"`
+	Skywalker float64 `json:"skywalker"`
+	Sato      float64 `json:"sato"`
 }
 
 //Message is a model
 type Message struct {
-	Kenobi    []string `json:kenobi`
-	Skywalker []string `json:skywalker`
-	Sato      []string `json:soto`
+	Kenobi    []string `json:"kenobi"`
+	Skywalker []string `json:"skywalker"`
+	Sato      []string `json:"sato"`
 }
 
 //TopSecretRequest is a model
@@ -62,7 +45,24 @@ type TopSecretResponse struct {
 	Message  string   `json:"message"`
 }
 
-func receiveMessage(w http.ResponseWriter, r *http.Request) {
+func main() {
+	handleRequests()
+}
+
+func handleRequests() {
+	myRouter := mux.NewRouter().StrictSlash(true)
+	myRouter.HandleFunc("/", home)
+	myRouter.HandleFunc("/topsecret", postTopSecret).Methods("POST")
+
+	log.Fatal(http.ListenAndServe(":8080", myRouter))
+}
+
+func home(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Welcome to the Api")
+	fmt.Println("Endpoint Hit: homePage")
+}
+
+func postTopSecret(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
 
