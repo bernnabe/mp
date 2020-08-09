@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"strings"
 
@@ -52,6 +53,10 @@ func main() {
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/", home)
+
+	myRouter.HandleFunc("/topsecret_split", postTopSecretSplit).Methods("GET")
+	myRouter.HandleFunc("/topsecret_split", getTopSecretSplit).Methods("POST")
+
 	myRouter.HandleFunc("/topsecret", postTopSecret).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", myRouter))
@@ -59,6 +64,40 @@ func handleRequests() {
 
 func home(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the Api")
+}
+
+func postTopSecretSplit(w http.ResponseWriter, r *http.Request) {
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	w.Header().Set("Content-Type", "application/json")
+
+	var error error
+	var request TopSecretRequest
+	json.Unmarshal(reqBody, &request)
+
+	x, y, error := getPosition(request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
+
+	if error != nil {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w)
+		return
+	}
+
+	message, error := GetMessage(request.Message.Kenobi, request.Message.Skywalker, request.Message.Sato)
+
+	if error != nil {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w)
+		return
+	}
+
+	json.NewEncoder(w).Encode(TopSecretResponse{
+		Message:  message,
+		Position: Position{X: x, Y: y},
+	})
+}
+
+func getTopSecretSplit(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func postTopSecret(w http.ResponseWriter, r *http.Request) {
@@ -124,14 +163,13 @@ func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []strin
 	return strings.TrimRight(buffer.String(), " ")
 }
 
-// type Position struct {
-// 	X        float64 `json:"x"`
-// 	Y        float64 `json:"y"`
-// 	Distance float64
-// }
+type SatPosition struct {
+	X        float64
+	Y        float64
+	Distance float64
+}
 
 func getPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error) {
-	return 0, 0, nil
 
 	/*
 		Triangulación en el plano
@@ -156,37 +194,44 @@ func getPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y 
 
 	*/
 
-	var satellitesPosition = []Position{}
+	var satellitesPosition = []SatPosition{}
 
 	satellitesPosition = append(satellitesPosition,
-		Position{3, 3},
-	)
-	// satellitesPosition = append(satellitesPosition,
-	// 	Position{3, 3, float64(kenobiDistance)},
-	// )
+		SatPosition{3, 3, float64(kenobiDistance)},
+		SatPosition{6, 10, float64(skywalkerDistance)},
+		SatPosition{9, 3, float64(satoDistance)})
 
-	// Position{6, 10, float64(skywalkerDistance)},
-	// Position{9, 3, float64(satoDistance)})
+	result := []SatPosition{}
 
-	result := []Position{}
+	for _, position := range satellitesPosition {
+		for ix := 1; ix <= 15; ix++ {
+			for iy := 1; iy <= 15; iy++ {
+				x := float64(ix)
+				y := float64(iy)
 
-	// for _, position := range satellitesPosition {
-	// 	for ix := 1; ix <= 15; ix++ {
-	// 		for iy := 1; iy <= 15; iy++ {
-	// 			// x := float64(ix)
-	// 			// y := float64(iy)
+				// zero := position.Y - math.Sqrt(
+				// 	math.Pow(float64(position.Distance), 2)-
+				// 		math.Pow(x, 2)+
+				// 		2*x*position.X-
+				// 		math.Pow(position.X, 2))
 
-	// 			zero := 0
+				zero := position.Distance -
+					((math.Pow(x, 2) -
+						2*x*position.X +
+						math.Pow(position.X, 2)) +
+						(math.Pow(y, 2) -
+							2*y*position.Y +
+							math.Pow(position.Y, 2)))
 
-	// 			if zero == 0 {
-	// 				result = append(result, Position{X: float64(ix), Y: float64(iy), Distance: position.Distance})
-	// 				println("x:" + string(ix))
-	// 			}
+				if zero == 0 {
+					result = append(result, SatPosition{X: float64(ix), Y: float64(iy), Distance: position.Distance})
+					println("x:" + string(ix))
+				}
 
-	// 			println(int(zero))
-	// 		}
-	// 	}
-	// }
+				println(int(zero))
+			}
+		}
+	}
 
 	if len(result) != 2 {
 		return 0, 0, errors.New("the position can't be determined")
