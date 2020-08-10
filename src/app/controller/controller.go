@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -68,4 +69,8 @@ func PostTopSecret(w http.ResponseWriter, r *http.Request) {
 		Position: model.Position{X: x, Y: y},
 	})
 
+}
+
+func Home(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Message Api")
 }
