@@ -22,9 +22,8 @@ func NewMessageService() Message {
 // input: Mensajes tal cual se reciben en cada satelite
 // output: Mensaje tal cual fué enviado desde el emisor.
 func (service *MessageService) GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error) {
-	validStructures := len(kenobiMessages) == len(skywalkerMessages) && len(kenobiMessages) == len(satoMessages)
 
-	if !validStructures {
+	if !(len(kenobiMessages) == len(skywalkerMessages) && len(kenobiMessages) == len(satoMessages)) {
 		return "", errors.New("message isn't well formed")
 	}
 

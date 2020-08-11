@@ -26,7 +26,6 @@ func PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 
 	if getPositionError != nil || getMessagerror != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w)
 		return
 	}
 
@@ -52,7 +51,6 @@ func PostTopSecret(w http.ResponseWriter, r *http.Request) {
 
 	if getPositionError != nil || getMessagerror != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w)
 		return
 	}
 	json.NewEncoder(w).Encode(model.TopSecretResponse{
