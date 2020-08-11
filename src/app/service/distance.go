@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"math"
 )
 
@@ -35,6 +36,10 @@ func (service *DistanceService) GetPosition(kenobiDistance, skywalkerDistance, s
 
 	xResult := getX(satoPosition, skywalkerPosition, kenobiPosition)
 	yResult := getY(xResult, satoPosition, skywalkerPosition, kenobiPosition)
+
+	if math.IsNaN(xResult) || math.IsNaN(yResult) {
+		return 0, 0, errors.New("the position cannot be determined")
+	}
 
 	return xResult, yResult, nil
 }
