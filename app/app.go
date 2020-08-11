@@ -23,10 +23,10 @@ type ApiApplication struct {
 
 // New : build new ApiApplication
 func New(configFilePaths ...string) AppInterface {
-	generalConfig := config.Loadconfig(configFilePaths...)
+	// generalConfig := config.Loadconfig(configFilePaths...)
 
 	return &ApiApplication{
-		config: generalConfig,
+		config: nil,
 	}
 }
 

@@ -12,6 +12,17 @@
             "program": "${fileDirname}",
             "env": {},
             "args": []
-        }
+        },
+        {
+            "name": "Tests",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "remotePath": "",
+            "program": "${file}",
+            "env": {},
+            "args": [],
+            "showLog": true
+        }       
     ]
 }
