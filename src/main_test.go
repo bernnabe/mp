@@ -7,22 +7,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetPositionEq(t *testing.T) {
-	distanceService := service.NewDistanceService()
-	x, y, err := distanceService.GetPositionEq(5, 3, 5)
-
-	assert.Nil(t, err)
-	assert.Equal(t, x, 5)
-	assert.Equal(t, y, 7)
-}
 func TestGetPosition(t *testing.T) {
 	distanceService := service.NewDistanceService()
-	x, y, err := distanceService.GetPosition(25, 9, 25)
+	x, y, err := distanceService.GetPosition(5, 3, 5)
 
 	assert.Nil(t, err)
 	assert.Equal(t, x, 5)
 	assert.Equal(t, y, 7)
 }
+
+// func TestGetPosition(t *testing.T) {
+// 	distanceService := service.NewDistanceService()
+// 	x, y, err := distanceService.GetPosition(25, 9, 25)
+
+// 	assert.Nil(t, err)
+// 	assert.Equal(t, x, 5)
+// 	assert.Equal(t, y, 7)
+// }
 
 func TestWhenMessageIsIncomplete(t *testing.T) {
 	kenobi := []string{"", "este", "es", "un", "mensaje"}
