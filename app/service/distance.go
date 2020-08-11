@@ -123,7 +123,7 @@ func compareX(source, target, reference SatPosition) []float64 {
 //X=1 va a estar un minimo de 3 veces en el array y es el valor que estoy buscando
 func getUniqueValue(a []float64) (r float64) {
 	count, tempCount := 1, 0
-	popular := a[0]
+	unique := a[0]
 
 	for i := 0; i < len(a)-1; i++ {
 		temp := a[i]
@@ -136,10 +136,10 @@ func getUniqueValue(a []float64) (r float64) {
 		}
 
 		if tempCount > count {
-			popular = temp
+			unique = temp
 			count = tempCount
 		}
 	}
 
-	return popular
+	return unique
 }
