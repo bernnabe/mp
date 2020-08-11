@@ -10,9 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// AppInterface is object which wrap the necessary modules for this system.
-// It will export high level interface function.
-type AppInterface interface {
+type App interface {
 	// Start http server
 	Start(serverPort string)
 }
@@ -22,9 +20,7 @@ type ApiApplication struct {
 }
 
 // New : build new ApiApplication
-func New(configFilePaths ...string) AppInterface {
-	// generalConfig := config.Loadconfig(configFilePaths...)
-
+func New(configFilePaths ...string) App {
 	return &ApiApplication{
 		config: nil,
 	}

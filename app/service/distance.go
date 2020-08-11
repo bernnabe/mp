@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-type DistanceInterface interface {
+type Distance interface {
 	GetPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error)
 }
 
@@ -13,7 +13,7 @@ type DistanceService struct {
 }
 
 // New : build new Service
-func NewDistanceService() DistanceInterface {
+func NewDistanceService() Distance {
 	return &DistanceService{}
 }
 
@@ -97,7 +97,7 @@ func compareX(source, target, reference SatPosition) []float64 {
 	k4 := k1 / -k2
 	k5 := k3 / -k2
 
-	//Resuelvo por ecuación utilizando el resultado de la ecuación anterior
+	//Resuelvo la ecuación del tercer punto utilizando el resultado de la ecuación anterior
 	//como parámetro de la tercera ecuación
 	a := 1 + math.Pow(k4, 2)
 	b := (-2 * reference.X) +

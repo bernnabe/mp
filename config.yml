@@ -1,4 +1,0 @@
-swagger:
- host: "localhost:8080"
- version: v1
- base_path: /

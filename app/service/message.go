@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type MessageInterface interface {
+type Message interface {
 	GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error)
 }
 
@@ -14,7 +14,7 @@ type MessageService struct {
 }
 
 // New : build new Service
-func NewMessageService() MessageInterface {
+func NewMessageService() Message {
 	return &MessageService{}
 }
 
