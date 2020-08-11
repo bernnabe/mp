@@ -21,7 +21,7 @@ type ApiApplication struct {
 	config *config.GeneralConfig
 }
 
-// New : build new ApiApplication object with config and logging
+// New : build new ApiApplication
 func New(configFilePaths ...string) AppInterface {
 	generalConfig := config.Loadconfig(configFilePaths...)
 

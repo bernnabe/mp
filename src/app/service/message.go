@@ -6,10 +6,22 @@ import (
 	"strings"
 )
 
+type MessageInterface interface {
+	GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error)
+}
+
+type MessageService struct {
+}
+
+// New : build new Service
+func NewMessageService() MessageInterface {
+	return &MessageService{}
+}
+
 // GetMessage Procesa los mensajes recibidos en cada satelite
 // input: Mensajes tal cual se reciben en cada satelite
 // output: Mensaje tal cual fué enviado desde el emisor.
-func GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error) {
+func (service *MessageService) GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error) {
 	validStructures := len(kenobiMessages) == len(skywalkerMessages) && len(kenobiMessages) == len(satoMessages)
 
 	if !validStructures {

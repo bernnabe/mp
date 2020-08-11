@@ -3,11 +3,21 @@ package main
 import (
 	"testing"
 
+	"github.com/bernnabe/mp/app/service"
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetPositionEq(t *testing.T) {
+	distanceService := service.NewDistanceService()
+	x, y, err := distanceService.GetPositionEq(5, 3, 5)
+
+	assert.Nil(t, err)
+	assert.Equal(t, x, 5)
+	assert.Equal(t, y, 7)
+}
 func TestGetPosition(t *testing.T) {
-	x, y, err := getPosition(25, 9, 25)
+	distanceService := service.NewDistanceService()
+	x, y, err := distanceService.GetPosition(25, 9, 25)
 
 	assert.Nil(t, err)
 	assert.Equal(t, x, 5)
@@ -20,8 +30,8 @@ func TestWhenMessageIsIncomplete(t *testing.T) {
 	sato := []string{"", "", "es", "", "mensaje"}
 
 	var result string
-
-	result, err := GetMessage(kenobi, skywalker, sato)
+	messageService := service.NewMessageService()
+	result, err := messageService.GetMessage(kenobi, skywalker, sato)
 
 	assert.NotNil(t, err)
 	assert.EqualValues(t, "", result)
@@ -33,8 +43,8 @@ func TestWhenMessageIsWellFormed(t *testing.T) {
 	sato := []string{"", "", "es", "", "mensaje"}
 
 	var result string
-
-	result, err := GetMessage(kenobi, skywalker, sato)
+	messageService := service.NewMessageService()
+	result, err := messageService.GetMessage(kenobi, skywalker, sato)
 
 	assert.Nil(t, err)
 	assert.EqualValues(t, "este es un mensaje", result)
@@ -45,8 +55,8 @@ func TestWhenRandomHelloMessage(t *testing.T) {
 	skywalker := []string{"", "", "", "", "Hola5"}
 	sato := []string{"", "Hola2", "Hola3", "Hola4", ""}
 	var result string
-
-	result, err := GetMessage(kenobi, skywalker, sato)
+	messageService := service.NewMessageService()
+	result, err := messageService.GetMessage(kenobi, skywalker, sato)
 
 	assert.Nil(t, err)
 	assert.EqualValues(t, "Hola1 Hola2 Hola3 Hola4 Hola5", result)
