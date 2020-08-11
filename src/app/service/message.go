@@ -35,13 +35,6 @@ func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []strin
 	keys := make(map[string]bool)
 	var buffer bytes.Buffer
 
-	var addPart = func(part string, keys map[string]bool, buffer *bytes.Buffer) {
-		if _, value := keys[part]; !value && part != "" {
-			keys[part] = true
-			buffer.WriteString(part + " ")
-		}
-	}
-
 	for i := range kenobiMessages {
 		addPart(kenobiMessages[i], keys, &buffer)
 		addPart(skywalkerMessages[i], keys, &buffer)
@@ -49,4 +42,11 @@ func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []strin
 	}
 
 	return strings.TrimRight(buffer.String(), " ")
+}
+
+func addPart(part string, keys map[string]bool, buffer *bytes.Buffer) {
+	if _, value := keys[part]; !value && part != "" {
+		keys[part] = true
+		buffer.WriteString(part + " ")
+	}
 }

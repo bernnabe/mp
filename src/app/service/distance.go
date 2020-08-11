@@ -44,6 +44,7 @@ func (service *DistanceService) GetPosition(kenobiDistance, skywalkerDistance, s
 	return xResult, yResult, nil
 }
 
+//getY Determina el punto Y de intersección en base al Punto X
 func getY(xResult float64, kenobiPosition, skywalkerPosition, satoPosition SatPosition) float64 {
 
 	result := []float64{}
@@ -52,7 +53,7 @@ func getY(xResult float64, kenobiPosition, skywalkerPosition, satoPosition SatPo
 	result = append(result, compareY(xResult, skywalkerPosition)...)
 	result = append(result, compareY(xResult, satoPosition)...)
 
-	return getPopularElement(result)
+	return getUniqueValue(result)
 }
 
 func compareY(xResult float64, satellite SatPosition) []float64 {
@@ -64,17 +65,17 @@ func compareY(xResult float64, satellite SatPosition) []float64 {
 	return result
 }
 
+//getX Determina en base a dos ecuaciones el punto X de interseccion con la tercera ecuación
 func getX(kenobiPosition, skywalkerPosition, satoPosition SatPosition) float64 {
 	result := []float64{}
 
 	result = append(result, compareX(kenobiPosition, skywalkerPosition, satoPosition)...)
 	result = append(result, compareX(kenobiPosition, satoPosition, skywalkerPosition)...)
 
-	return getPopularElement(result)
+	return getUniqueValue(result)
 }
 
 func compareX(source, target, reference SatPosition) []float64 {
-
 	//Igualo la ecuación de posición de source y target para determinar uno de los puntos en comun con la tercera ecuación
 	k1 := (-2 * source.X) + (2 * target.X)
 	k2 := (-2 * source.Y) + (2 * target.Y)
@@ -86,6 +87,7 @@ func compareX(source, target, reference SatPosition) []float64 {
 		math.Pow(target.Y, 2) +
 		math.Pow(target.Distance, 2)
 
+	//Si k2 es igual a cero es el punto unico de intersección
 	if k2 == 0 {
 		result := -k3 / k1
 		return []float64{result, result}
@@ -95,7 +97,7 @@ func compareX(source, target, reference SatPosition) []float64 {
 	k4 := k1 / -k2
 	k5 := k3 / -k2
 
-	//Resuelvo por ecuación cuadrática utilizando el resultado de la ecuación anterior
+	//Resuelvo por ecuación utilizando el resultado de la ecuación anterior
 	//como parámetro de la tercera ecuación
 	a := 1 + math.Pow(k4, 2)
 	b := (-2 * reference.X) +
@@ -109,13 +111,17 @@ func compareX(source, target, reference SatPosition) []float64 {
 
 	sqrtResult := math.Sqrt(math.Pow(b, 2) - (4 * a * c))
 
+	//Calculo los dos valores resultantes posibles de la ecuación
 	eqResult1 := (-b + sqrtResult) / (2 * a)
 	eqResult2 := (-b - sqrtResult) / (2 * a)
 
 	return []float64{eqResult1, eqResult2}
 }
 
-func getPopularElement(a []float64) (r float64) {
+//getUniqueValue Determina el valor más relevante en un array
+//Por ej. Dado el resultado de un sistema de ecuaciones donde X=1 es el valor que funciona en las tres ecuaciones lineales,
+//X=1 va a estar un minimo de 3 veces en el array y es el valor que estoy buscando
+func getUniqueValue(a []float64) (r float64) {
 	count, tempCount := 1, 0
 	popular := a[0]
 
