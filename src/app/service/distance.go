@@ -106,8 +106,10 @@ func compareX(source, target, reference SatPosition) []float64 {
 		math.Pow(reference.Y, 2) -
 		math.Pow(reference.Distance, 2)
 
-	eqResult1 := (-b + math.Sqrt(math.Pow(b, 2)-(4*a*c))) / (2 * a)
-	eqResult2 := (-b - math.Sqrt(math.Pow(b, 2)-(4*a*c))) / (2 * a)
+	sqrtResult := math.Sqrt(math.Pow(b, 2) - (4 * a * c))
+
+	eqResult1 := (-b + sqrtResult) / (2 * a)
+	eqResult2 := (-b - sqrtResult) / (2 * a)
 
 	return []float64{eqResult1, eqResult2}
 }
