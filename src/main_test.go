@@ -12,8 +12,8 @@ func TestGetPosition(t *testing.T) {
 	x, y, err := distanceService.GetPosition(5, 3, 5)
 
 	assert.Nil(t, err)
-	assert.Equal(t, x, 5)
-	assert.Equal(t, y, 7)
+	assert.Equal(t, x, float64(6))
+	assert.Equal(t, y, float64(7))
 }
 
 // func TestGetPosition(t *testing.T) {
