@@ -16,15 +16,6 @@ func TestGetPosition(t *testing.T) {
 	assert.Equal(t, y, float64(7))
 }
 
-// func TestGetPosition(t *testing.T) {
-// 	distanceService := service.NewDistanceService()
-// 	x, y, err := distanceService.GetPosition(25, 9, 25)
-
-// 	assert.Nil(t, err)
-// 	assert.Equal(t, x, 5)
-// 	assert.Equal(t, y, 7)
-// }
-
 func TestWhenMessageIsIncomplete(t *testing.T) {
 	kenobi := []string{"", "este", "es", "un", "mensaje"}
 	skywalker := []string{"este", "", "un", "mensaje"}

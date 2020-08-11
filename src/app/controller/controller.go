@@ -18,8 +18,8 @@ func PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 	var request model.TopSecretRequest
 	json.Unmarshal(reqBody, &request)
 
-	messageService := service.NewMessageService()
 	distanceService := service.NewDistanceService()
+	messageService := service.NewMessageService()
 
 	x, y, getPositionError := distanceService.GetPosition(request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
 	message, getMessagerror := messageService.GetMessage(request.Message.Kenobi, request.Message.Skywalker, request.Message.Sato)
