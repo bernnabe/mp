@@ -69,7 +69,6 @@ func getX(kenobiPosition, skywalkerPosition, satoPosition SatPosition) float64 {
 
 	result = append(result, compareX(kenobiPosition, skywalkerPosition, satoPosition)...)
 	result = append(result, compareX(kenobiPosition, satoPosition, skywalkerPosition)...)
-	result = append(result, compareX(satoPosition, skywalkerPosition, kenobiPosition)...)
 
 	return getPopularElement(result)
 }
@@ -92,10 +91,12 @@ func compareX(source, target, reference SatPosition) []float64 {
 		return []float64{result, result}
 	}
 
+	//Simplifico el resultado de la ecuación
 	k4 := k1 / -k2
 	k5 := k3 / -k2
 
-	//Resuelvo por ecuación cuadrática
+	//Resuelvo por ecuación cuadrática utilizando el resultado de la ecuación anterior
+	//como parámetro de la tercera ecuación
 	a := 1 + math.Pow(k4, 2)
 	b := (-2 * reference.X) +
 		2*k4*k5 -
