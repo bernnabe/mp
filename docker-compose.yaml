@@ -1,21 +1,23 @@
 version: '3'
+
 services:
-  app:
-    container_name: full_app
-    build: .
-    ports: 
-      - 8080:8080 
-    restart: on-failure
+  mp-api:
+    image: mp-api:0.0.1
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
     volumes:
-      - api:/usr/src/app/
+      - proyect_data:/data
     networks:
       - fullstack
 
-   
-volumes:
-  api:
-
-# Networks to be created to facilitate communication between containers
 networks:
   fullstack:
     driver: bridge
+
+volumes:
+  proyect_data:
+    driver: local
+  
