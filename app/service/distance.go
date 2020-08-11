@@ -34,8 +34,7 @@ func (service *DistanceService) GetPosition(kenobiDistance, skywalkerDistance, s
 	skywalkerPosition := SatPosition{6, 10, float64(skywalkerDistance)} //x2. y2. distance r2
 	satoPosition := SatPosition{9, 3, float64(satoDistance)}            //x2. y3. distance r3
 
-	xResult := getX(satoPosition, skywalkerPosition, kenobiPosition)
-	yResult := getY(xResult, satoPosition, skywalkerPosition, kenobiPosition)
+	xResult, yResult := getXY(kenobiPosition, skywalkerPosition, satoPosition)
 
 	if math.IsNaN(xResult) || math.IsNaN(yResult) {
 		return 0, 0, errors.New("the position cannot be determined")
@@ -44,39 +43,28 @@ func (service *DistanceService) GetPosition(kenobiDistance, skywalkerDistance, s
 	return xResult, yResult, nil
 }
 
-//getY Determina el punto Y de intersección en base al Punto X
-func getY(xResult float64, kenobiPosition, skywalkerPosition, satoPosition SatPosition) float64 {
-
+//getXY Determina en base a dos ecuaciones el punto X de interseccion con la tercera ecuación
+func getXY(kenobiPosition, skywalkerPosition, satoPosition SatPosition) (x float64, y float64) {
 	result := []float64{}
 
-	result = append(result, compareY(xResult, kenobiPosition)...)
-	result = append(result, compareY(xResult, skywalkerPosition)...)
-	result = append(result, compareY(xResult, satoPosition)...)
+	k1, k2, k3 := 0, 1, 2
+	k4, k5, k6 := 3, 4, 5
 
-	return getUniqueValue(result)
+	result = append(result, getEqLine(kenobiPosition, skywalkerPosition)...)
+	result = append(result, getEqLine(kenobiPosition, satoPosition)...)
+
+	p1 := (((result[k1] * result[k6]) / result[k4]) - result[k3]) /
+		(result[k2] -
+			((result[k1] * result[k5]) /
+				result[k4]))
+
+	p2 := (-result[k3] - (result[k2] * p1)) / result[k1]
+
+	return p2, p1
 }
 
-func compareY(xResult float64, satellite SatPosition) []float64 {
-	result := []float64{}
-
-	result = append(result, math.Sqrt(math.Pow(satellite.Distance, 2)-math.Pow(xResult-satellite.X, 2))+satellite.Y)
-	result = append(result, satellite.Y-math.Sqrt(math.Pow(satellite.Distance, 2)-math.Pow(xResult-satellite.X, 2)))
-
-	return result
-}
-
-//getX Determina en base a dos ecuaciones el punto X de interseccion con la tercera ecuación
-func getX(kenobiPosition, skywalkerPosition, satoPosition SatPosition) float64 {
-	result := []float64{}
-
-	result = append(result, compareX(kenobiPosition, skywalkerPosition, satoPosition)...)
-	result = append(result, compareX(kenobiPosition, satoPosition, skywalkerPosition)...)
-
-	return getUniqueValue(result)
-}
-
-func compareX(source, target, reference SatPosition) []float64 {
-	//Igualo la ecuación de posición de source y target para determinar uno de los puntos en comun con la tercera ecuación
+func getEqLine(source, target SatPosition) []float64 {
+	//Igualo la ecuación de la recta de source y target para determinar uno de los puntos en comun con la tercera ecuación
 	k1 := (-2 * source.X) + (2 * target.X)
 	k2 := (-2 * source.Y) + (2 * target.Y)
 
@@ -87,59 +75,5 @@ func compareX(source, target, reference SatPosition) []float64 {
 		math.Pow(target.Y, 2) +
 		math.Pow(target.Distance, 2)
 
-	//Si k2 es igual a cero es el punto unico de intersección
-	if k2 == 0 {
-		result := -k3 / k1
-		return []float64{result, result}
-	}
-
-	//Simplifico el resultado de la ecuación
-	k4 := k1 / -k2
-	k5 := k3 / -k2
-
-	//Resuelvo la ecuación del tercer punto utilizando el resultado de la ecuación anterior
-	//como parámetro de la tercera ecuación
-	a := 1 + math.Pow(k4, 2)
-	b := (-2 * reference.X) +
-		2*k4*k5 -
-		2*reference.Y*k4
-	c := math.Pow(k5, 2) -
-		2*reference.Y*k5 +
-		math.Pow(reference.X, 2) +
-		math.Pow(reference.Y, 2) -
-		math.Pow(reference.Distance, 2)
-
-	sqrtResult := math.Sqrt(math.Pow(b, 2) - (4 * a * c))
-
-	//Calculo los dos valores resultantes posibles de la ecuación
-	eqResult1 := (-b + sqrtResult) / (2 * a)
-	eqResult2 := (-b - sqrtResult) / (2 * a)
-
-	return []float64{eqResult1, eqResult2}
-}
-
-//getUniqueValue Determina el valor más relevante en un array
-//Por ej. Dado el resultado de un sistema de ecuaciones donde X=1 es el valor que funciona en las tres ecuaciones lineales,
-//X=1 va a estar un minimo de 3 veces en el array y es el valor que estoy buscando
-func getUniqueValue(a []float64) (r float64) {
-	count, tempCount := 1, 0
-	unique := a[0]
-
-	for i := 0; i < len(a)-1; i++ {
-		temp := a[i]
-		tempCount = 0
-
-		for j := 1; j < len(a); j++ {
-			if temp == a[j] {
-				tempCount++
-			}
-		}
-
-		if tempCount > count {
-			unique = temp
-			count = tempCount
-		}
-	}
-
-	return unique
+	return []float64{k1, k2, k3}
 }
