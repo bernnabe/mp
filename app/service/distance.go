@@ -3,24 +3,65 @@ package service
 import (
 	"errors"
 	"math"
+
+	"github.com/bernnabe/mp/app/repository"
 )
 
 type Distance interface {
 	GetPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error)
+	TryGetSplitedDistance(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error)
 }
 
 type DistanceService struct {
+	Repository repository.DistanceRepositoryInterface
 }
 
 // New : build new Service
-func NewDistanceService() Distance {
-	return &DistanceService{}
+func NewDistanceService(repository repository.DistanceRepositoryInterface) Distance {
+	return &DistanceService{
+		Repository: repository,
+	}
 }
 
 type satPosition struct {
 	X        float64
 	Y        float64
 	Distance float64
+}
+
+// TryGetSplitedDistance Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
+func (service *DistanceService) TryGetSplitedDistance(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error) {
+	const (
+		kenobiKey    = "kenobi"
+		skywalkerKey = "skywalker"
+		satoKey      = "sato"
+	)
+
+	kenobi := service.Repository.Get(kenobiKey)
+	skywalker := service.Repository.Get(skywalkerKey)
+	sato := service.Repository.Get(satoKey)
+
+	if kenobi == 0 {
+		kenobi = kenobiDistance
+	}
+	if skywalker == 0 {
+		skywalker = skywalkerDistance
+	}
+	if sato == 0 {
+		sato = satoDistance
+	}
+
+	xResult, yResult, err := service.GetPosition(kenobi, skywalker, sato)
+
+	if err == nil {
+		return xResult, yResult, nil
+	}
+
+	service.Repository.Add(kenobiKey, kenobi)
+	service.Repository.Add(skywalkerKey, skywalker)
+	service.Repository.Add(satoKey, sato)
+
+	return 0, 0, errors.New("Not enoght information")
 }
 
 //GetPosition Determina la posición de un punto en el plano r2 utilizando un sistema de ecuaciones

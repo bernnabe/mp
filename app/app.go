@@ -39,6 +39,7 @@ func (app *ApiApplication) Start(serverPort string) {
 	//Get Services
 	messageService, distanceService := getServices()
 
+	// Get Controller
 	controller := controller.NewController(messageService, distanceService)
 
 	//Api Routing map
@@ -51,9 +52,8 @@ func (app *ApiApplication) Start(serverPort string) {
 }
 
 func getServices() (m service.Message, d service.Distance) {
-	repository := repository.NewRepository()
-	messageService := service.NewMessageService(repository)
-	distanceService := service.NewDistanceService()
+	messageService := service.NewMessageService(repository.NewMessageRepository())
+	distanceService := service.NewDistanceService(repository.NewDistanceRepository())
 
 	return messageService, distanceService
 }

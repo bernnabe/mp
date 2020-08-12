@@ -1,6 +1,6 @@
 package repository
 
-type Repository interface {
+type MessageRepositoryInterface interface {
 	Add(clave string, valor []string)
 	Get(clave string) (valor []string)
 	GetAll() (data map[string][]string)
@@ -14,7 +14,7 @@ var (
 	messagesParts = make(map[string][]string)
 )
 
-func NewRepository() Repository {
+func NewMessageRepository() MessageRepositoryInterface {
 	return &MessageRepository{}
 }
 

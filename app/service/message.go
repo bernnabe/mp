@@ -14,23 +14,24 @@ type Message interface {
 }
 
 type MessageService struct {
-	Repository repository.Repository
+	Repository repository.MessageRepositoryInterface
 }
 
 // New : build new Service
-func NewMessageService(repository repository.Repository) Message {
+func NewMessageService(repository repository.MessageRepositoryInterface) Message {
 	return &MessageService{
 		Repository: repository,
 	}
 }
 
-const (
-	kenobiKey    = "kenobi"
-	skywalkerKey = "skywalker"
-	satoKey      = "sato"
-)
-
+//TryGetSplitedMessage Intenta determinar el mensaje si todos los satellites ya informaron su parte
 func (service *MessageService) TryGetSplitedMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (m string, err error) {
+	const (
+		kenobiKey    = "kenobi"
+		skywalkerKey = "skywalker"
+		satoKey      = "sato"
+	)
+
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
@@ -42,7 +43,6 @@ func (service *MessageService) TryGetSplitedMessage(kenobiMessages, skywalkerMes
 	message, err := service.GetMessage(kenobi, skywalker, sato)
 
 	if err == nil {
-		service.Repository.Clear()
 		return message, nil
 	}
 
