@@ -28,12 +28,6 @@ func NewMessageService(repository repository.MessageRepositoryInterface) Message
 
 //TryGetSplitedMessage Intenta determinar el mensaje si todos los satellites ya informaron su parte
 func (service *MessageService) TryGetSplitedMessage() (m string, err error) {
-	const (
-		kenobiKey    = "kenobi"
-		skywalkerKey = "skywalker"
-		satoKey      = "sato"
-	)
-
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
@@ -49,12 +43,6 @@ func (service *MessageService) TryGetSplitedMessage() (m string, err error) {
 
 //AddMessagePart
 func (service *MessageService) AddMessagePart(kenobiMessages, skywalkerMessages, satoMessages []string) {
-	const (
-		kenobiKey    = "kenobi"
-		skywalkerKey = "skywalker"
-		satoKey      = "sato"
-	)
-
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)

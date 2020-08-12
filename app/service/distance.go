@@ -33,12 +33,6 @@ type satPosition struct {
 
 // TryGetSplitedDistance Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
 func (service *DistanceService) TryGetSplitedDistance() (x, y float64, err error) {
-	const (
-		kenobiKey    = "kenobi"
-		skywalkerKey = "skywalker"
-		satoKey      = "sato"
-	)
-
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
@@ -54,12 +48,6 @@ func (service *DistanceService) TryGetSplitedDistance() (x, y float64, err error
 
 // AddDistancePart Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
 func (service *DistanceService) AddDistancePart(kenobiDistance, skywalkerDistance, satoDistance float64) {
-	const (
-		kenobiKey    = "kenobi"
-		skywalkerKey = "skywalker"
-		satoKey      = "sato"
-	)
-
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
