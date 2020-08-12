@@ -101,8 +101,8 @@ func getXY(kenobiPosition, skywalkerPosition, satoPosition satPosition) (x float
 	results = append(results, getEqLine(kenobiPosition, satoPosition)...)
 
 	//Posiciones en array results
-	k1, k2, k3 := 0, 1, 2
-	k4, k5, k6 := 3, 4, 5
+	const k1, k2, k3 = 0, 1, 2
+	const k4, k5, k6 = 3, 4, 5
 
 	//Usando las posiciones hago los calculos para determinar Y
 	y1 := (((results[k1] * results[k6]) / results[k4]) - results[k3]) /
@@ -117,7 +117,7 @@ func getXY(kenobiPosition, skywalkerPosition, satoPosition satPosition) (x float
 }
 
 func getEqLine(source, target satPosition) []float64 {
-	//Igualo la ecuación de la recta de source y target para determinar uno de los puntos en comun con la tercera ecuación
+	//Igualo la ecuación de la recta de source y target
 	k1 := (-2 * source.X) + (2 * target.X)
 	k2 := (-2 * source.Y) + (2 * target.Y)
 
