@@ -1,13 +1,13 @@
 package app
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/bernnabe/mp/app/controller"
 	"github.com/bernnabe/mp/config"
 	"github.com/gorilla/mux"
+	muxlogrus "github.com/pytimer/mux-logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type App interface {
@@ -28,17 +28,16 @@ func New(configFilePaths ...string) App {
 
 // Start serve http server
 func (app *ApiApplication) Start(serverPort string) {
-
 	// init new handler
 	myRouter := mux.NewRouter().StrictSlash(true)
+
+	// add logger middleware
+	myRouter.Use(muxlogrus.NewLogger().Middleware)
+
+	//Api Routing map
 	myRouter.HandleFunc("/", controller.Home)
-
-	// myRouter.HandleFunc("/topsecret_split", postTopSecretSplit).Methods("GET")
-	// myRouter.HandleFunc("/topsecret_split", getTopSecretSplit).Methods("POST")
-
 	myRouter.HandleFunc("/topsecret", controller.PostTopSecret).Methods("POST")
 
-	fmt.Println("Server Started at http://localhost:" + serverPort)
-
+	log.Info("Server Started at http://localhost:" + serverPort)
 	log.Fatal(http.ListenAndServe(":"+serverPort, myRouter))
 }

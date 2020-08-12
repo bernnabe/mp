@@ -44,7 +44,7 @@ func (service *DistanceService) GetPosition(kenobiDistance, skywalkerDistance, s
 }
 
 //getXY Determina en base a dos ecuaciones el punto X de interseccion con la tercera ecuación
-func getXY(kenobiPosition, skywalkerPosition, satoPosition SatPosition) (x float64, y float64) {
+func getXY(kenobiPosition, skywalkerPosition, satoPosition SatPosition) (p1 float64, p2 float64) {
 	result := []float64{}
 
 	k1, k2, k3 := 0, 1, 2
@@ -57,19 +57,19 @@ func getXY(kenobiPosition, skywalkerPosition, satoPosition SatPosition) (x float
 	result = append(result, getEqLine(kenobiPosition, satoPosition)...)
 
 	//Punto x de la tercera recta
-	p1 := (((result[k1] * result[k6]) / result[k4]) - result[k3]) /
+	x := (((result[k1] * result[k6]) / result[k4]) - result[k3]) /
 		(result[k2] -
 			((result[k1] * result[k5]) /
 				result[k4]))
 
 	//Punto y de la tercera recta
-	p2 := (-result[k3] - (result[k2] * p1)) / result[k1]
+	y := (-result[k3] - (result[k2] * p1)) / result[k1]
 
-	return p2, p1
+	return x, y
 }
 
 func getEqLine(source, target SatPosition) []float64 {
-	//Igualo la ecuación de la recta de source y target para determinar uno de los puntos en comun con la tercera ecuación
+	//Igualo la ecuación de la recta de source y target
 	k1 := (-2 * source.X) + (2 * target.X)
 	k2 := (-2 * source.Y) + (2 * target.Y)
 
