@@ -46,12 +46,13 @@ func (app *ApiApplication) Start(serverPort string) {
 	myRouter.HandleFunc("/", controller.Home)
 	myRouter.HandleFunc("/topsecret", controller.PostTopSecret).Methods("POST")
 	myRouter.HandleFunc("/topsecret_split", controller.PostTopSecretSplit).Methods("POST")
+	myRouter.HandleFunc("/topsecret_split", controller.GetTopSecretSplit).Methods("GET")
 
 	log.Info("Server Started at http://localhost:" + serverPort)
 	log.Fatal(http.ListenAndServe(":"+serverPort, myRouter))
 }
 
-func getServices() (m service.Message, d service.Distance) {
+func getServices() (m service.MessageServiceInterface, d service.DistanceServiceInterface) {
 	messageService := service.NewMessageService(repository.NewMessageRepository())
 	distanceService := service.NewDistanceService(repository.NewDistanceRepository())
 

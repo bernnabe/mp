@@ -8,9 +8,11 @@ import (
 	"github.com/bernnabe/mp/app/repository"
 )
 
-type Message interface {
+type MessageServiceInterface interface {
 	GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error)
-	TryGetSplitedMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error)
+	TryGetSplitedMessage() (message string, err error)
+	AddMessagePart(kenobiMessages, skywalkerMessages, satoMessages []string)
+	ClearParts()
 }
 
 type MessageService struct {
@@ -18,14 +20,35 @@ type MessageService struct {
 }
 
 // New : build new Service
-func NewMessageService(repository repository.MessageRepositoryInterface) Message {
+func NewMessageService(repository repository.MessageRepositoryInterface) MessageServiceInterface {
 	return &MessageService{
 		Repository: repository,
 	}
 }
 
 //TryGetSplitedMessage Intenta determinar el mensaje si todos los satellites ya informaron su parte
-func (service *MessageService) TryGetSplitedMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (m string, err error) {
+func (service *MessageService) TryGetSplitedMessage() (m string, err error) {
+	const (
+		kenobiKey    = "kenobi"
+		skywalkerKey = "skywalker"
+		satoKey      = "sato"
+	)
+
+	kenobi := service.Repository.Get(kenobiKey)
+	skywalker := service.Repository.Get(skywalkerKey)
+	sato := service.Repository.Get(satoKey)
+
+	message, err := service.GetMessage(kenobi, skywalker, sato)
+
+	if err == nil {
+		return message, nil
+	}
+
+	return "", errors.New("Not enoght information")
+}
+
+//AddMessagePart
+func (service *MessageService) AddMessagePart(kenobiMessages, skywalkerMessages, satoMessages []string) {
 	const (
 		kenobiKey    = "kenobi"
 		skywalkerKey = "skywalker"
@@ -40,17 +63,9 @@ func (service *MessageService) TryGetSplitedMessage(kenobiMessages, skywalkerMes
 	skywalker = append(skywalker, skywalkerMessages...)
 	sato = append(sato, satoMessages...)
 
-	message, err := service.GetMessage(kenobi, skywalker, sato)
-
-	if err == nil {
-		return message, nil
-	}
-
 	service.Repository.Add(kenobiKey, kenobi)
 	service.Repository.Add(skywalkerKey, skywalker)
 	service.Repository.Add(satoKey, sato)
-
-	return "", errors.New("Not enoght information")
 }
 
 // GetMessage Procesa los mensajes recibidos en cada satelite
@@ -83,4 +98,8 @@ func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []strin
 	}
 
 	return strings.TrimRight(buffer.String(), " ")
+}
+
+func (service *MessageService) ClearParts() {
+	service.Repository.Clear()
 }

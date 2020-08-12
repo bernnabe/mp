@@ -7,9 +7,11 @@ import (
 	"github.com/bernnabe/mp/app/repository"
 )
 
-type Distance interface {
+type DistanceServiceInterface interface {
 	GetPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error)
-	TryGetSplitedDistance(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error)
+	TryGetSplitedDistance() (x, y float64, err error)
+	AddDistancePart(kenobiDistance, skywalkerDistance, satoDistance float64)
+	ClearParts()
 }
 
 type DistanceService struct {
@@ -17,7 +19,7 @@ type DistanceService struct {
 }
 
 // New : build new Service
-func NewDistanceService(repository repository.DistanceRepositoryInterface) Distance {
+func NewDistanceService(repository repository.DistanceRepositoryInterface) DistanceServiceInterface {
 	return &DistanceService{
 		Repository: repository,
 	}
@@ -30,7 +32,28 @@ type satPosition struct {
 }
 
 // TryGetSplitedDistance Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
-func (service *DistanceService) TryGetSplitedDistance(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error) {
+func (service *DistanceService) TryGetSplitedDistance() (x, y float64, err error) {
+	const (
+		kenobiKey    = "kenobi"
+		skywalkerKey = "skywalker"
+		satoKey      = "sato"
+	)
+
+	kenobi := service.Repository.Get(kenobiKey)
+	skywalker := service.Repository.Get(skywalkerKey)
+	sato := service.Repository.Get(satoKey)
+
+	xResult, yResult, err := service.GetPosition(kenobi, skywalker, sato)
+
+	if err == nil {
+		return xResult, yResult, nil
+	}
+
+	return 0, 0, errors.New("Not enoght information")
+}
+
+// AddDistancePart Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
+func (service *DistanceService) AddDistancePart(kenobiDistance, skywalkerDistance, satoDistance float64) {
 	const (
 		kenobiKey    = "kenobi"
 		skywalkerKey = "skywalker"
@@ -51,17 +74,9 @@ func (service *DistanceService) TryGetSplitedDistance(kenobiDistance, skywalkerD
 		sato = satoDistance
 	}
 
-	xResult, yResult, err := service.GetPosition(kenobi, skywalker, sato)
-
-	if err == nil {
-		return xResult, yResult, nil
-	}
-
 	service.Repository.Add(kenobiKey, kenobi)
 	service.Repository.Add(skywalkerKey, skywalker)
 	service.Repository.Add(satoKey, sato)
-
-	return 0, 0, errors.New("Not enoght information")
 }
 
 //GetPosition Determina la posición de un punto en el plano r2 utilizando un sistema de ecuaciones
@@ -74,6 +89,10 @@ func (service *DistanceService) GetPosition(kenobiDistance, skywalkerDistance, s
 	kenobiPosition := satPosition{3, 3, float64(kenobiDistance)}        //x1. y1. distance r1
 	skywalkerPosition := satPosition{6, 10, float64(skywalkerDistance)} //x2. y2. distance r2
 	satoPosition := satPosition{9, 3, float64(satoDistance)}            //x2. y3. distance r3
+
+	if kenobiDistance == 0 || skywalkerDistance == 0 || satoDistance == 0 {
+		return 0, 0, errors.New("not enoght information to determine position")
+	}
 
 	xResult, yResult := getXY(kenobiPosition, skywalkerPosition, satoPosition)
 
@@ -117,4 +136,8 @@ func getEqLine(source, target satPosition) []float64 {
 		math.Pow(target.Distance, 2)
 
 	return []float64{k1, k2, k3}
+}
+
+func (service *DistanceService) ClearParts() {
+	service.Repository.Clear()
 }
