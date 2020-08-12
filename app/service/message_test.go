@@ -3,6 +3,7 @@ package service
 import (
 	"testing"
 
+	"github.com/bernnabe/mp/app/repository"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,7 +13,7 @@ func TestWhenMessageIsIncomplete(t *testing.T) {
 	sato := []string{"", "", "es", "", "mensaje"}
 
 	var result string
-	messageService := NewMessageService()
+	messageService := NewMessageService(repository.NewMessageRepository())
 	result, err := messageService.GetMessage(kenobi, skywalker, sato)
 
 	assert.NotNil(t, err)
@@ -25,7 +26,7 @@ func TestWhenMessageIsWellFormed(t *testing.T) {
 	sato := []string{"", "", "es", "", "mensaje"}
 
 	var result string
-	messageService := NewMessageService()
+	messageService := NewMessageService(repository.NewMessageRepository())
 	result, err := messageService.GetMessage(kenobi, skywalker, sato)
 
 	assert.Nil(t, err)
@@ -37,7 +38,7 @@ func TestWhenRandomHelloMessage(t *testing.T) {
 	skywalker := []string{"", "", "", "", "Hola5"}
 	sato := []string{"", "Hola2", "Hola3", "Hola4", ""}
 	var result string
-	messageService := NewMessageService()
+	messageService := NewMessageService(repository.NewMessageRepository())
 	result, err := messageService.GetMessage(kenobi, skywalker, sato)
 
 	assert.Nil(t, err)
