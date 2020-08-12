@@ -105,15 +105,15 @@ func getXY(kenobiPosition, skywalkerPosition, satoPosition satPosition) (x float
 	const k4, k5, k6 = 3, 4, 5
 
 	//Usando las posiciones hago los calculos para determinar Y
-	y1 := (((results[k1] * results[k6]) / results[k4]) - results[k3]) /
+	yResult := (((results[k1] * results[k6]) / results[k4]) - results[k3]) /
 		(results[k2] -
 			((results[k1] * results[k5]) /
 				results[k4]))
 
 	//Usando las posiciones hago los calculos para determinar X
-	x1 := (-results[k3] - (results[k2] * y1)) / results[k1]
+	xResult := (-results[k3] - (results[k2] * yResult)) / results[k1]
 
-	return x1, y1
+	return xResult, yResult
 }
 
 func getEqLine(source, target satPosition) []float64 {
