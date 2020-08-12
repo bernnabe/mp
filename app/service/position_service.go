@@ -91,7 +91,7 @@ func (service *PositionService) GetPosition(kenobiDistance, skywalkerDistance, s
 	return xResult, yResult, nil
 }
 
-//getXY Determina en base a dos ecuaciones el punto X de interseccion con la tercera ecuación
+//getXY Determina en base a dos ecuaciones el punto X Y de interseccion con la tercera ecuación
 func getXY(kenobiPosition, skywalkerPosition, satoPosition satPosition) (x float64, y float64) {
 	result := []float64{}
 

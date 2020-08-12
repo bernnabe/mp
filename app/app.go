@@ -37,10 +37,10 @@ func (app *ApiApplication) Start(serverPort string) {
 	myRouter.Use(muxlogrus.NewLogger().Middleware)
 
 	//Get Services
-	messageService, distanceService := getServices()
+	messageService, positionService := getServices()
 
 	// Get Controller
-	controller := controller.NewController(messageService, distanceService)
+	controller := controller.NewController(messageService, positionService)
 
 	//Api Routing map
 	myRouter.HandleFunc("/", controller.Home)
@@ -52,7 +52,7 @@ func (app *ApiApplication) Start(serverPort string) {
 	log.Fatal(http.ListenAndServe(":"+serverPort, myRouter))
 }
 
-func getServices() (m service.MessageServiceInterface, d service.PositionServiceInterface) {
+func getServices() (m service.MessageServiceInterface, p service.PositionServiceInterface) {
 	messageService := service.NewMessageService(repository.NewMessageRepository())
 	positionService := service.NewPositionService(repository.NewPositionRepository())
 
