@@ -8,8 +8,8 @@ import (
 )
 
 func TestGetPosition(t *testing.T) {
-	distanceService := NewDistanceService(repository.NewDistanceRepository())
-	x, y, err := distanceService.GetPosition(5, 3, 5)
+	positionService := NewPositionService(repository.NewPositionRepository())
+	x, y, err := positionService.GetPosition(5, 3, 5)
 
 	assert.Nil(t, err)
 	assert.Equal(t, x, float64(6))
