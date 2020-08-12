@@ -38,10 +38,10 @@ func (service *MessageService) TryGetSplitedMessage() (m string, err error) {
 		return message, nil
 	}
 
-	return "", errors.New("Not enough information")
+	return "", errors.New("not enough information")
 }
 
-//AddMessagePart
+//AddMessagePart Agrega las partes de los mensajes
 func (service *MessageService) AddMessagePart(kenobiMessages, skywalkerMessages, satoMessages []string) {
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
@@ -62,7 +62,7 @@ func (service *MessageService) AddMessagePart(kenobiMessages, skywalkerMessages,
 func (service *MessageService) GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (m string, err error) {
 
 	if !(len(kenobiMessages) == len(skywalkerMessages) && len(kenobiMessages) == len(satoMessages)) {
-		return "", errors.New("message isn't well formed")
+		return "", errors.New("message has not been well received")
 	}
 
 	return processMessageParts(kenobiMessages, skywalkerMessages, satoMessages), nil
