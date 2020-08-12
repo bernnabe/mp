@@ -10,6 +10,7 @@ import (
 
 type Message interface {
 	GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error)
+	TryGetSplitedMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error)
 }
 
 type MessageService struct {
@@ -23,12 +24,39 @@ func NewMessageService(repository repository.Repository) Message {
 	}
 }
 
+const (
+	kenobiKey    = "kenobi"
+	skywalkerKey = "skywalker"
+	satoKey      = "sato"
+)
+
+func (service *MessageService) TryGetSplitedMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (m string, err error) {
+	kenobi := service.Repository.Get(kenobiKey)
+	skywalker := service.Repository.Get(skywalkerKey)
+	sato := service.Repository.Get(satoKey)
+
+	kenobi = append(kenobi, kenobiMessages...)
+	skywalker = append(skywalker, skywalkerMessages...)
+	sato = append(sato, satoMessages...)
+
+	message, err := service.GetMessage(kenobi, skywalker, sato)
+
+	if err == nil {
+		service.Repository.Clear()
+		return message, nil
+	}
+
+	service.Repository.Add(kenobiKey, kenobi)
+	service.Repository.Add(skywalkerKey, skywalker)
+	service.Repository.Add(satoKey, sato)
+
+	return "", errors.New("Not enoght information")
+}
+
 // GetMessage Procesa los mensajes recibidos en cada satelite
 // input: Mensajes tal cual se reciben en cada satelite
 // output: Mensaje tal cual fué enviado desde el emisor.
-func (service *MessageService) GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error) {
-
-	service.Repository.Save("kenobi", kenobiMessages[0])
+func (service *MessageService) GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (m string, err error) {
 
 	if !(len(kenobiMessages) == len(skywalkerMessages) && len(kenobiMessages) == len(satoMessages)) {
 		return "", errors.New("message isn't well formed")

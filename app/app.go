@@ -44,6 +44,7 @@ func (app *ApiApplication) Start(serverPort string) {
 	//Api Routing map
 	myRouter.HandleFunc("/", controller.Home)
 	myRouter.HandleFunc("/topsecret", controller.PostTopSecret).Methods("POST")
+	myRouter.HandleFunc("/topsecret_split", controller.PostTopSecretSplit).Methods("POST")
 
 	log.Info("Server Started at http://localhost:" + serverPort)
 	log.Fatal(http.ListenAndServe(":"+serverPort, myRouter))

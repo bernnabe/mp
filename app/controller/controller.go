@@ -37,17 +37,16 @@ func (controller *GenericController) PostTopSecretSplit(w http.ResponseWriter, r
 	var request model.TopSecretRequest
 	json.Unmarshal(reqBody, &request)
 
-	x, y, getPositionError := controller.DistanceService.GetPosition(request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
-	message, getMessagerror := controller.MessageService.GetMessage(request.Message.Kenobi, request.Message.Skywalker, request.Message.Sato)
+	message, getMessagerror := controller.MessageService.TryGetSplitedMessage(request.Message.Kenobi, request.Message.Skywalker, request.Message.Sato)
 
-	if getPositionError != nil || getMessagerror != nil {
+	if getMessagerror != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	json.NewEncoder(w).Encode(model.TopSecretResponse{
-		Message:  message,
-		Position: model.Position{X: x, Y: y},
+		Message: message,
+		// Position: model.Position{X: x, Y: y},
 	})
 }
 
