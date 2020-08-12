@@ -43,7 +43,7 @@ func (service *PositionService) TryGetSplitedPosition() (x, y float64, err error
 		return xResult, yResult, nil
 	}
 
-	return 0, 0, errors.New("Not enoght information")
+	return 0, 0, errors.New("Not enough information")
 }
 
 // AddDistancePart Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
@@ -79,7 +79,7 @@ func (service *PositionService) GetPosition(kenobiDistance, skywalkerDistance, s
 	satoPosition := satPosition{9, 3, float64(satoDistance)}            //x2. y3. distance r3
 
 	if kenobiDistance == 0 || skywalkerDistance == 0 || satoDistance == 0 {
-		return 0, 0, errors.New("not enoght information to determine position")
+		return 0, 0, errors.New("not enough information to determine position")
 	}
 
 	xResult, yResult := getXY(kenobiPosition, skywalkerPosition, satoPosition)

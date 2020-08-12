@@ -38,7 +38,7 @@ func (service *MessageService) TryGetSplitedMessage() (m string, err error) {
 		return message, nil
 	}
 
-	return "", errors.New("Not enoght information")
+	return "", errors.New("Not enough information")
 }
 
 //AddMessagePart
