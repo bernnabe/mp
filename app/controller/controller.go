@@ -19,14 +19,14 @@ type Controller interface {
 
 type GenericController struct {
 	MessageService  service.MessageServiceInterface
-	DistanceService service.DistanceServiceInterface
+	PositionService service.PositionServiceInterface
 }
 
 // New : build new Controller
-func NewController(messageService service.MessageServiceInterface, distanceService service.DistanceServiceInterface) Controller {
+func NewController(messageService service.MessageServiceInterface, positionService service.PositionServiceInterface) Controller {
 	return &GenericController{
 		MessageService:  messageService,
-		DistanceService: distanceService,
+		PositionService: positionService,
 	}
 }
 
@@ -39,7 +39,7 @@ func (controller *GenericController) GetTopSecretSplit(w http.ResponseWriter, r 
 	json.Unmarshal(reqBody, &request)
 
 	message, getMessageError := controller.MessageService.TryGetSplitedMessage()
-	x, y, getDistanceError := controller.DistanceService.TryGetSplitedDistance()
+	x, y, getDistanceError := controller.PositionService.TryGetSplitedPosition()
 
 	if getMessageError != nil || getDistanceError != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -54,7 +54,7 @@ func (controller *GenericController) GetTopSecretSplit(w http.ResponseWriter, r 
 
 	//Esto es una especie de akc del mensaje
 	controller.MessageService.ClearParts()
-	controller.DistanceService.ClearParts()
+	controller.PositionService.ClearParts()
 }
 
 // PostTopSecretSplit Recibe el mensaje en partes e intenta devolver el mensaje original y la posicion
@@ -66,7 +66,7 @@ func (controller *GenericController) PostTopSecretSplit(w http.ResponseWriter, r
 	json.Unmarshal(reqBody, &request)
 
 	controller.MessageService.AddMessagePart(request.Message.Kenobi, request.Message.Skywalker, request.Message.Sato)
-	controller.DistanceService.AddDistancePart(request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
+	controller.PositionService.AddDistancePart(request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -79,7 +79,7 @@ func (controller *GenericController) PostTopSecret(w http.ResponseWriter, r *htt
 	var request model.TopSecretRequest
 	json.Unmarshal(reqBody, &request)
 
-	x, y, getPositionError := controller.DistanceService.GetPosition(request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
+	x, y, getPositionError := controller.PositionService.GetPosition(request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
 	message, getMessagerror := controller.MessageService.GetMessage(request.Message.Kenobi, request.Message.Skywalker, request.Message.Sato)
 
 	if getPositionError != nil || getMessagerror != nil {

@@ -52,9 +52,9 @@ func (app *ApiApplication) Start(serverPort string) {
 	log.Fatal(http.ListenAndServe(":"+serverPort, myRouter))
 }
 
-func getServices() (m service.MessageServiceInterface, d service.DistanceServiceInterface) {
+func getServices() (m service.MessageServiceInterface, d service.PositionServiceInterface) {
 	messageService := service.NewMessageService(repository.NewMessageRepository())
-	distanceService := service.NewDistanceService(repository.NewDistanceRepository())
+	positionService := service.NewPositionService(repository.NewPositionRepository())
 
-	return messageService, distanceService
+	return messageService, positionService
 }

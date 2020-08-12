@@ -7,20 +7,20 @@ import (
 	"github.com/bernnabe/mp/app/repository"
 )
 
-type DistanceServiceInterface interface {
+type PositionServiceInterface interface {
 	GetPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error)
-	TryGetSplitedDistance() (x, y float64, err error)
+	TryGetSplitedPosition() (x, y float64, err error)
 	AddDistancePart(kenobiDistance, skywalkerDistance, satoDistance float64)
 	ClearParts()
 }
 
-type DistanceService struct {
-	Repository repository.DistanceRepositoryInterface
+type PositionService struct {
+	Repository repository.PositionRepositoryInterface
 }
 
 // New : build new Service
-func NewDistanceService(repository repository.DistanceRepositoryInterface) DistanceServiceInterface {
-	return &DistanceService{
+func NewPositionService(repository repository.PositionRepositoryInterface) PositionServiceInterface {
+	return &PositionService{
 		Repository: repository,
 	}
 }
@@ -31,8 +31,8 @@ type satPosition struct {
 	Distance float64
 }
 
-// TryGetSplitedDistance Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
-func (service *DistanceService) TryGetSplitedDistance() (x, y float64, err error) {
+// TryGetSplitedPosition Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
+func (service *PositionService) TryGetSplitedPosition() (x, y float64, err error) {
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
@@ -47,7 +47,7 @@ func (service *DistanceService) TryGetSplitedDistance() (x, y float64, err error
 }
 
 // AddDistancePart Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
-func (service *DistanceService) AddDistancePart(kenobiDistance, skywalkerDistance, satoDistance float64) {
+func (service *PositionService) AddDistancePart(kenobiDistance, skywalkerDistance, satoDistance float64) {
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
@@ -73,7 +73,7 @@ func (service *DistanceService) AddDistancePart(kenobiDistance, skywalkerDistanc
 // Triangulación en el plano
 // https://www.wolframalpha.com/input/?i=%28x-3%29%5E2%2B%28y-3%29%5E2%3D5%5E2%3B+%28x-6%29%5E2%2B%28y-10%29%5E2%3D3%5E2%3B+%28x-9%29%5E2%2B%28y-3%29%5E2%3D5%5E2%3B
 //
-func (service *DistanceService) GetPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error) {
+func (service *PositionService) GetPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error) {
 	kenobiPosition := satPosition{3, 3, float64(kenobiDistance)}        //x1. y1. distance r1
 	skywalkerPosition := satPosition{6, 10, float64(skywalkerDistance)} //x2. y2. distance r2
 	satoPosition := satPosition{9, 3, float64(satoDistance)}            //x2. y3. distance r3
@@ -126,6 +126,6 @@ func getEqLine(source, target satPosition) []float64 {
 	return []float64{k1, k2, k3}
 }
 
-func (service *DistanceService) ClearParts() {
+func (service *PositionService) ClearParts() {
 	service.Repository.Clear()
 }
