@@ -8,7 +8,7 @@ type MessageRepository struct {
 }
 
 var (
-	messagesRepository map[string]string
+	messagesRepository = make(map[string]string)
 )
 
 func NewRepository() Repository {

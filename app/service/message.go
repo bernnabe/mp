@@ -28,6 +28,8 @@ func NewMessageService(repository repository.Repository) Message {
 // output: Mensaje tal cual fué enviado desde el emisor.
 func (service *MessageService) GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error) {
 
+	service.Repository.Save("kenobi", kenobiMessages[0])
+
 	if !(len(kenobiMessages) == len(skywalkerMessages) && len(kenobiMessages) == len(satoMessages)) {
 		return "", errors.New("message isn't well formed")
 	}
