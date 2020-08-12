@@ -1,10 +1,20 @@
 package repository
 
-// var messagesRepository map[string]string
+type Repository interface {
+	Save(clave string, valor string)
+}
 
-// func Save(request TopSecretRequest) error {
+type MessageRepository struct {
+}
 
-// 	request
+var (
+	messagesRepository map[string]string
+)
 
-// 	return nil
-// }
+func NewRepository() Repository {
+	return &MessageRepository{}
+}
+
+func (repository *MessageRepository) Save(clave string, valor string) {
+	messagesRepository[clave] = valor
+}

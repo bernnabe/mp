@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"strings"
+
+	"github.com/bernnabe/mp/app/repository"
 )
 
 type Message interface {
@@ -11,11 +13,14 @@ type Message interface {
 }
 
 type MessageService struct {
+	Repository repository.Repository
 }
 
 // New : build new Service
-func NewMessageService() Message {
-	return &MessageService{}
+func NewMessageService(repository repository.Repository) Message {
+	return &MessageService{
+		Repository: repository,
+	}
 }
 
 // GetMessage Procesa los mensajes recibidos en cada satelite
