@@ -50,14 +50,19 @@ func getXY(kenobiPosition, skywalkerPosition, satoPosition SatPosition) (x float
 	k1, k2, k3 := 0, 1, 2
 	k4, k5, k6 := 3, 4, 5
 
+	//Primera Recta
 	result = append(result, getEqLine(kenobiPosition, skywalkerPosition)...)
+
+	//Segunda Recta
 	result = append(result, getEqLine(kenobiPosition, satoPosition)...)
 
+	//Punto x de la tercera recta
 	p1 := (((result[k1] * result[k6]) / result[k4]) - result[k3]) /
 		(result[k2] -
 			((result[k1] * result[k5]) /
 				result[k4]))
 
+	//Punto y de la tercera recta
 	p2 := (-result[k3] - (result[k2] * p1)) / result[k1]
 
 	return p2, p1
