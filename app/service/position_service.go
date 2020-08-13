@@ -101,11 +101,10 @@ func getXY(kenobiPosition, skywalkerPosition, satoPosition satPosition) (x float
 
 	//Usando las posiciones hago los calculos para determinar Y
 	yResult := (((k1 * k6) / k4) - k3) /
-		(k2 -
-			((k1 * k5) /
-				k4))
+		(k2 - ((k1 * k5) /
+			k4))
 
-	//Usando las posiciones hago los calculos para determinar X
+	//Usando las posiciones hago los calculos para determinar X en funcion yResult
 	xResult := (-k3 - (k2 * yResult)) / k1
 
 	return xResult, yResult
