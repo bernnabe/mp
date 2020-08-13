@@ -8,6 +8,7 @@ docker-compose up
 Api:
 ----
 Local: http://localhost:8080/
+
 Pública: https://dry-sea-61276.herokuapp.com/
 
 
@@ -31,6 +32,3 @@ curl --header "Content-Type: application/json" --request POST --data '{ "distanc
 
 
 curl --header "Content-Type: application/json" --request GET http://localhost:8080/topsecret_slip
-
-
-https://dry-sea-61276.herokuapp.com/
