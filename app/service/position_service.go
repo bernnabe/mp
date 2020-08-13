@@ -93,30 +93,25 @@ func (service *PositionService) GetPosition(kenobiDistance, skywalkerDistance, s
 
 //getXY Determina en base a dos ecuaciones el punto X Y de interseccion con la tercera ecuación
 func getXY(kenobiPosition, skywalkerPosition, satoPosition satPosition) (x float64, y float64) {
-	results := []float64{}
 
 	//Calculo los puntos que forman la recta resultante kenobi/skywalkerPosition
-	results = append(results, getEqLine(kenobiPosition, skywalkerPosition)...)
+	k1, k2, k3 := getEqLine(kenobiPosition, skywalkerPosition)
 	//Calculo los puntos que forman la recta resultante kenobi/sato
-	results = append(results, getEqLine(kenobiPosition, satoPosition)...)
-
-	//Posiciones en array results
-	const k1, k2, k3 = 0, 1, 2
-	const k4, k5, k6 = 3, 4, 5
+	k4, k5, k6 := getEqLine(kenobiPosition, satoPosition)
 
 	//Usando las posiciones hago los calculos para determinar Y
-	yResult := (((results[k1] * results[k6]) / results[k4]) - results[k3]) /
-		(results[k2] -
-			((results[k1] * results[k5]) /
-				results[k4]))
+	yResult := (((k1 * k6) / k4) - k3) /
+		(k2 -
+			((k1 * k5) /
+				k4))
 
 	//Usando las posiciones hago los calculos para determinar X
-	xResult := (-results[k3] - (results[k2] * yResult)) / results[k1]
+	xResult := (-k3 - (k2 * yResult)) / k1
 
 	return xResult, yResult
 }
 
-func getEqLine(source, target satPosition) []float64 {
+func getEqLine(source, target satPosition) (float64, float64, float64) {
 	//Igualo la ecuación de la recta de source y target
 	k1 := (-2 * source.X) + (2 * target.X)
 	k2 := (-2 * source.Y) + (2 * target.Y)
@@ -128,7 +123,7 @@ func getEqLine(source, target satPosition) []float64 {
 		math.Pow(target.Y, 2) +
 		math.Pow(target.Distance, 2)
 
-	return []float64{k1, k2, k3}
+	return k1, k2, k3
 }
 
 func (service *PositionService) ClearParts() {
