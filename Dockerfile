@@ -1,11 +1,5 @@
 # Start from golang base image
-FROM golang:alpine as builder
-
-# ENV GO111MODULE=on
-
-# Install git.
-# Git is required for fetching the dependencies.
-RUN apk update && apk add --no-cache git
+FROM golang:stretch as build
 
 # Set the current working directory inside the container 
 WORKDIR /app
@@ -14,19 +8,9 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+RUN go build -o main .
 
-# Start a new stage from scratch
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-
-WORKDIR /root/
-
-# Copy the Pre-built binary file from the previous stage. Observe we also copied the .env file
-COPY --from=builder /app/main .
-
-# Expose port 8080 to the outside world
-EXPOSE 8080
-
-#Command to run the executable
+### Put the binary onto Heroku image
+FROM heroku/heroku:18
+COPY --from=build /app/main .
 CMD ["./main"]
