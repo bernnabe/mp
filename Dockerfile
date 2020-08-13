@@ -10,6 +10,8 @@ COPY . .
 # Build the Go app
 RUN go build -o main .
 
+EXPOSE 8080
+
 ### Put the binary onto Heroku image
 FROM heroku/heroku:18
 COPY --from=build /app/main .
