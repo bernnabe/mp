@@ -14,6 +14,7 @@ Pública: https://dry-sea-61276.herokuapp.com/
 
 CURL de ejempos:
 
+
 Pruebas al endpoint TopSecret:
 ---
 
@@ -36,20 +37,20 @@ Pruebas al endpoint TopSecret_Slip:
 
 
 Post del mensaje de kenobi:
-
+---
 
 curl --header "Content-Type: application/json" --request POST --data '{"distance": {"kenobi": 5 },"message":{"kenobi":["este", "", "", "mensaje", ""]}}' https://dry-sea-61276.herokuapp.com/topsecret_slip
 
 
 Post del mensaje de skywalker:
-
+---
 
 
 curl --header "Content-Type: application/json" --request POST --data '{"distance": {"skywalker": 3},"message":{"skywalker":["", "es", "","", "secreto"]}}' https://dry-sea-61276.herokuapp.com/topsecret_slip
 
 
 Post del mensaje de sato:  
-
+---
 
 curl --header "Content-Type: application/json" --request POST --data '{ "distance": { "sato":5},"message":{ "sato":["este", "", "un","", ""] } }' https://dry-sea-61276.herokuapp.com/topsecret_slip
 
