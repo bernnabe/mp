@@ -66,7 +66,7 @@ func (controller *GenericController) GetTopSecretSplit(w http.ResponseWriter, r 
 		Position: model.Position{X: x, Y: y},
 	})
 
-	//Esto es una especie de akc del mensaje
+	//Esto es una especie de ack del mensaje
 	controller.MessageService.ClearParts()
 	controller.PositionService.ClearParts()
 }
@@ -107,7 +107,6 @@ func (controller *GenericController) PostTopSecret(w http.ResponseWriter, r *htt
 
 	go func() {
 		x, y, getPositionError = controller.PositionService.GetPosition(&wg, request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
-		return
 	}()
 
 	var message string
@@ -115,7 +114,6 @@ func (controller *GenericController) PostTopSecret(w http.ResponseWriter, r *htt
 
 	go func() {
 		message, getMessagerror = controller.MessageService.GetMessage(&wg, request.Message.Kenobi, request.Message.Skywalker, request.Message.Sato)
-		return
 	}()
 
 	wg.Wait()
