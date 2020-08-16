@@ -3,14 +3,15 @@ package service
 import (
 	"errors"
 	"math"
+	"sync"
 
 	"github.com/bernnabe/mp/app/repository"
 )
 
 type PositionServiceInterface interface {
-	GetPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error)
-	TryGetSplitedPosition() (x, y float64, err error)
-	AddDistancePart(kenobiDistance, skywalkerDistance, satoDistance float64)
+	GetPosition(wg *sync.WaitGroup, kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error)
+	TryGetSplitedPosition(wg *sync.WaitGroup) (x, y float64, err error)
+	AddDistancePart(wg *sync.WaitGroup, kenobiDistance, skywalkerDistance, satoDistance float64)
 	ClearParts()
 }
 
@@ -32,12 +33,14 @@ type satPosition struct {
 }
 
 // TryGetSplitedPosition Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
-func (service *PositionService) TryGetSplitedPosition() (x, y float64, err error) {
+func (service *PositionService) TryGetSplitedPosition(wg *sync.WaitGroup) (x, y float64, err error) {
+	defer wg.Done()
+
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
 
-	xResult, yResult, err := service.GetPosition(kenobi, skywalker, sato)
+	xResult, yResult, err := getXY(kenobi, skywalker, sato)
 
 	if err == nil {
 		return xResult, yResult, nil
@@ -47,7 +50,9 @@ func (service *PositionService) TryGetSplitedPosition() (x, y float64, err error
 }
 
 // AddDistancePart Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
-func (service *PositionService) AddDistancePart(kenobiDistance, skywalkerDistance, satoDistance float64) {
+func (service *PositionService) AddDistancePart(wg *sync.WaitGroup, kenobiDistance, skywalkerDistance, satoDistance float64) {
+	defer wg.Done()
+
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
@@ -68,12 +73,18 @@ func (service *PositionService) AddDistancePart(kenobiDistance, skywalkerDistanc
 }
 
 //GetPosition Determina la posición de un punto en el plano r2 utilizando un sistema de ecuaciones
+func (service *PositionService) GetPosition(wg *sync.WaitGroup, kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error) {
+	defer wg.Done()
+
+	return getXY(kenobiDistance, skywalkerDistance, satoDistance)
+}
+
+//getXY Determina en base a dos ecuaciones el punto X Y de interseccion con la tercera ecuación
 //El método asume que la posición de la nave está en la intersección exacta de los tres satellites.
 //
 // Triangulación en el plano
 // https://www.wolframalpha.com/input/?i=%28x-3%29%5E2%2B%28y-3%29%5E2%3D5%5E2%3B+%28x-6%29%5E2%2B%28y-10%29%5E2%3D3%5E2%3B+%28x-9%29%5E2%2B%28y-3%29%5E2%3D5%5E2%3B
-//
-func (service *PositionService) GetPosition(kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error) {
+func getXY(kenobiDistance, skywalkerDistance, satoDistance float64) (x float64, y float64, err error) {
 	kenobiPosition := satPosition{3, 3, float64(kenobiDistance)}        //x1. y1. distance r1
 	skywalkerPosition := satPosition{6, 10, float64(skywalkerDistance)} //x2. y2. distance r2
 	satoPosition := satPosition{9, 3, float64(satoDistance)}            //x2. y3. distance r3
@@ -81,18 +92,6 @@ func (service *PositionService) GetPosition(kenobiDistance, skywalkerDistance, s
 	if kenobiDistance == 0 || skywalkerDistance == 0 || satoDistance == 0 {
 		return 0, 0, errors.New("not enough information to determine position")
 	}
-
-	xResult, yResult := getXY(kenobiPosition, skywalkerPosition, satoPosition)
-
-	if math.IsNaN(xResult) || math.IsNaN(yResult) {
-		return 0, 0, errors.New("the position cannot be determined")
-	}
-
-	return xResult, yResult, nil
-}
-
-//getXY Determina en base a dos ecuaciones el punto X Y de interseccion con la tercera ecuación
-func getXY(kenobiPosition, skywalkerPosition, satoPosition satPosition) (x float64, y float64) {
 
 	//Nombro las variables con K1...K6 ya que son sólo parametros para ser usados en la ultima ecuación.
 	//Calculo los puntos que forman la recta resultante kenobi/skywalkerPosition
@@ -108,8 +107,12 @@ func getXY(kenobiPosition, skywalkerPosition, satoPosition satPosition) (x float
 	//Usando las posiciones hago los calculos para determinar X en funcion yResult
 	xResult := (-k3 - (k2 * yResult)) / k1
 
+	if math.IsNaN(xResult) || math.IsNaN(yResult) {
+		return 0, 0, errors.New("the position cannot be determined")
+	}
+
 	//Devuelvo las coordenadas donde se intersectan las tres rectas
-	return xResult, yResult
+	return xResult, yResult, nil
 }
 
 func getEqLine(source, target satPosition) (float64, float64, float64) {

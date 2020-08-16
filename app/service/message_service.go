@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"strings"
+	"sync"
 
 	"github.com/bernnabe/mp/app/repository"
 )
 
 type MessageServiceInterface interface {
-	GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error)
-	TryGetSplitedMessage() (message string, err error)
-	AddMessagePart(kenobiMessages, skywalkerMessages, satoMessages []string)
+	GetMessage(wg *sync.WaitGroup, kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error)
+	TryGetSplitedMessage(wg *sync.WaitGroup) (message string, err error)
+	AddMessagePart(wg *sync.WaitGroup, kenobiMessages, skywalkerMessages, satoMessages []string)
 	ClearParts()
 }
 
@@ -27,12 +28,14 @@ func NewMessageService(repository repository.MessageRepositoryInterface) Message
 }
 
 //TryGetSplitedMessage Intenta determinar el mensaje si todos los satellites ya informaron su parte
-func (service *MessageService) TryGetSplitedMessage() (m string, err error) {
+func (service *MessageService) TryGetSplitedMessage(wg *sync.WaitGroup) (m string, err error) {
+	defer wg.Done()
+
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
 
-	message, err := service.GetMessage(kenobi, skywalker, sato)
+	message, err := processMessageParts(kenobi, skywalker, sato)
 
 	if err == nil {
 		return message, nil
@@ -42,7 +45,9 @@ func (service *MessageService) TryGetSplitedMessage() (m string, err error) {
 }
 
 //AddMessagePart Agrega las partes de los mensajes
-func (service *MessageService) AddMessagePart(kenobiMessages, skywalkerMessages, satoMessages []string) {
+func (service *MessageService) AddMessagePart(wg *sync.WaitGroup, kenobiMessages, skywalkerMessages, satoMessages []string) {
+	defer wg.Done()
+
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
@@ -59,18 +64,19 @@ func (service *MessageService) AddMessagePart(kenobiMessages, skywalkerMessages,
 // GetMessage Procesa los mensajes recibidos en cada satelite
 // input: Mensajes tal cual se reciben en cada satelite
 // output: Mensaje tal cual fué enviado desde el emisor.
-func (service *MessageService) GetMessage(kenobiMessages, skywalkerMessages, satoMessages []string) (m string, err error) {
+func (service *MessageService) GetMessage(wg *sync.WaitGroup, kenobiMessages, skywalkerMessages, satoMessages []string) (m string, err error) {
+	defer wg.Done()
+
+	return processMessageParts(kenobiMessages, skywalkerMessages, satoMessages)
+}
+
+func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []string) (string, error) {
+	keys := make(map[string]bool)
+	var buffer bytes.Buffer
 
 	if !(len(kenobiMessages) == len(skywalkerMessages) && len(kenobiMessages) == len(satoMessages)) {
 		return "", errors.New("message has not been well received")
 	}
-
-	return processMessageParts(kenobiMessages, skywalkerMessages, satoMessages), nil
-}
-
-func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []string) string {
-	keys := make(map[string]bool)
-	var buffer bytes.Buffer
 
 	add := func(part string, keys map[string]bool, buffer *bytes.Buffer) {
 		if _, value := keys[part]; !value && part != "" {
@@ -85,7 +91,7 @@ func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []strin
 		add(satoMessages[i], keys, &buffer)
 	}
 
-	return strings.TrimRight(buffer.String(), " ")
+	return strings.TrimRight(buffer.String(), " "), nil
 }
 
 func (service *MessageService) ClearParts() {
