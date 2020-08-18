@@ -5,13 +5,14 @@ import (
 	"math"
 	"sync"
 
+	"github.com/bernnabe/mp/app/model"
 	"github.com/bernnabe/mp/app/repository"
 )
 
 type PositionServiceInterface interface {
-	GetPosition(wg *sync.WaitGroup, kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error)
+	GetPosition(wg *sync.WaitGroup, distance model.Distance) (x, y float64, err error)
 	TryGetSplitedPosition(wg *sync.WaitGroup) (x, y float64, err error)
-	AddDistancePart(wg *sync.WaitGroup, kenobiDistance, skywalkerDistance, satoDistance float64)
+	AddDistancePart(wg *sync.WaitGroup, distance model.Distance)
 	ClearParts()
 }
 
@@ -36,11 +37,13 @@ type satPosition struct {
 func (service *PositionService) TryGetSplitedPosition(wg *sync.WaitGroup) (x, y float64, err error) {
 	defer wg.Done()
 
-	kenobi := service.Repository.Get(kenobiKey)
-	skywalker := service.Repository.Get(skywalkerKey)
-	sato := service.Repository.Get(satoKey)
+	model := model.Distance{
+		Kenobi:    service.Repository.Get(kenobiKey),
+		Skywalker: service.Repository.Get(skywalkerKey),
+		Sato:      service.Repository.Get(satoKey),
+	}
 
-	xResult, yResult, err := getXY(kenobi, skywalker, sato)
+	xResult, yResult, err := getXY(model)
 
 	if err == nil {
 		return xResult, yResult, nil
@@ -50,7 +53,7 @@ func (service *PositionService) TryGetSplitedPosition(wg *sync.WaitGroup) (x, y 
 }
 
 // AddDistancePart Intenta determinar la posición de la nave si es que ya conoce la posición de todos los satellites
-func (service *PositionService) AddDistancePart(wg *sync.WaitGroup, kenobiDistance, skywalkerDistance, satoDistance float64) {
+func (service *PositionService) AddDistancePart(wg *sync.WaitGroup, distance model.Distance) {
 	defer wg.Done()
 
 	kenobi := service.Repository.Get(kenobiKey)
@@ -58,13 +61,13 @@ func (service *PositionService) AddDistancePart(wg *sync.WaitGroup, kenobiDistan
 	sato := service.Repository.Get(satoKey)
 
 	if kenobi == 0 {
-		kenobi = kenobiDistance
+		kenobi = distance.Kenobi
 	}
 	if skywalker == 0 {
-		skywalker = skywalkerDistance
+		skywalker = distance.Skywalker
 	}
 	if sato == 0 {
-		sato = satoDistance
+		sato = distance.Sato
 	}
 
 	service.Repository.Add(kenobiKey, kenobi)
@@ -73,10 +76,10 @@ func (service *PositionService) AddDistancePart(wg *sync.WaitGroup, kenobiDistan
 }
 
 //GetPosition Determina la posición de un punto en el plano r2 utilizando un sistema de ecuaciones
-func (service *PositionService) GetPosition(wg *sync.WaitGroup, kenobiDistance, skywalkerDistance, satoDistance float64) (x, y float64, err error) {
+func (service *PositionService) GetPosition(wg *sync.WaitGroup, distance model.Distance) (x, y float64, err error) {
 	defer wg.Done()
 
-	return getXY(kenobiDistance, skywalkerDistance, satoDistance)
+	return getXY(distance)
 }
 
 //getXY Determina en base a dos ecuaciones el punto X Y de interseccion con la tercera ecuación
@@ -84,12 +87,12 @@ func (service *PositionService) GetPosition(wg *sync.WaitGroup, kenobiDistance, 
 //
 // Triangulación en el plano
 // https://www.wolframalpha.com/input/?i=%28x-3%29%5E2%2B%28y-3%29%5E2%3D5%5E2%3B+%28x-6%29%5E2%2B%28y-10%29%5E2%3D3%5E2%3B+%28x-9%29%5E2%2B%28y-3%29%5E2%3D5%5E2%3B
-func getXY(kenobiDistance, skywalkerDistance, satoDistance float64) (x float64, y float64, err error) {
-	kenobiPosition := satPosition{3, 3, float64(kenobiDistance)}        //x1. y1. distance r1
-	skywalkerPosition := satPosition{6, 10, float64(skywalkerDistance)} //x2. y2. distance r2
-	satoPosition := satPosition{9, 3, float64(satoDistance)}            //x2. y3. distance r3
+func getXY(distance model.Distance) (x float64, y float64, err error) {
+	kenobiPosition := satPosition{3, 3, float64(distance.Kenobi)}        //x1. y1. distance r1
+	skywalkerPosition := satPosition{6, 10, float64(distance.Skywalker)} //x2. y2. distance r2
+	satoPosition := satPosition{9, 3, float64(distance.Sato)}            //x2. y3. distance r3
 
-	if kenobiDistance == 0 || skywalkerDistance == 0 || satoDistance == 0 {
+	if distance.Kenobi == 0 || distance.Skywalker == 0 || distance.Sato == 0 {
 		return 0, 0, errors.New("not enough information to determine position")
 	}
 

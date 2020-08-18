@@ -6,13 +6,14 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/bernnabe/mp/app/model"
 	"github.com/bernnabe/mp/app/repository"
 )
 
 type MessageServiceInterface interface {
-	GetMessage(wg *sync.WaitGroup, kenobiMessages, skywalkerMessages, satoMessages []string) (message string, err error)
+	GetMessage(wg *sync.WaitGroup, messages model.Message) (message string, err error)
 	TryGetSplitedMessage(wg *sync.WaitGroup) (message string, err error)
-	AddMessagePart(wg *sync.WaitGroup, kenobiMessages, skywalkerMessages, satoMessages []string)
+	AddMessagePart(wg *sync.WaitGroup, messages model.Message)
 	ClearParts()
 }
 
@@ -35,7 +36,13 @@ func (service *MessageService) TryGetSplitedMessage(wg *sync.WaitGroup) (m strin
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
 
-	message, err := processMessageParts(kenobi, skywalker, sato)
+	model := model.Message{
+		Kenobi:    kenobi,
+		Skywalker: skywalker,
+		Sato:      sato,
+	}
+
+	message, err := processMessageParts(model)
 
 	if err == nil {
 		return message, nil
@@ -45,16 +52,16 @@ func (service *MessageService) TryGetSplitedMessage(wg *sync.WaitGroup) (m strin
 }
 
 //AddMessagePart Agrega las partes de los mensajes
-func (service *MessageService) AddMessagePart(wg *sync.WaitGroup, kenobiMessages, skywalkerMessages, satoMessages []string) {
+func (service *MessageService) AddMessagePart(wg *sync.WaitGroup, message model.Message) {
 	defer wg.Done()
 
 	kenobi := service.Repository.Get(kenobiKey)
 	skywalker := service.Repository.Get(skywalkerKey)
 	sato := service.Repository.Get(satoKey)
 
-	kenobi = append(kenobi, kenobiMessages...)
-	skywalker = append(skywalker, skywalkerMessages...)
-	sato = append(sato, satoMessages...)
+	kenobi = append(kenobi, message.Kenobi...)
+	skywalker = append(skywalker, message.Skywalker...)
+	sato = append(sato, message.Sato...)
 
 	service.Repository.Add(kenobiKey, kenobi)
 	service.Repository.Add(skywalkerKey, skywalker)
@@ -64,17 +71,17 @@ func (service *MessageService) AddMessagePart(wg *sync.WaitGroup, kenobiMessages
 // GetMessage Procesa los mensajes recibidos en cada satelite
 // input: Mensajes tal cual se reciben en cada satelite
 // output: Mensaje tal cual fué enviado desde el emisor.
-func (service *MessageService) GetMessage(wg *sync.WaitGroup, kenobiMessages, skywalkerMessages, satoMessages []string) (m string, err error) {
+func (service *MessageService) GetMessage(wg *sync.WaitGroup, message model.Message) (m string, err error) {
 	defer wg.Done()
 
-	return processMessageParts(kenobiMessages, skywalkerMessages, satoMessages)
+	return processMessageParts(message)
 }
 
-func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []string) (string, error) {
+func processMessageParts(message model.Message) (string, error) {
 	keys := make(map[string]bool)
 	var buffer bytes.Buffer
 
-	if !(len(kenobiMessages) == len(skywalkerMessages) && len(kenobiMessages) == len(satoMessages)) {
+	if !(len(message.Kenobi) == len(message.Skywalker) && len(message.Kenobi) == len(message.Sato)) {
 		return "", errors.New("message has not been well received")
 	}
 
@@ -85,10 +92,10 @@ func processMessageParts(kenobiMessages, skywalkerMessages, satoMessages []strin
 		}
 	}
 
-	for i := range kenobiMessages {
-		add(kenobiMessages[i], keys, &buffer)
-		add(skywalkerMessages[i], keys, &buffer)
-		add(satoMessages[i], keys, &buffer)
+	for i := range message.Kenobi {
+		add(message.Kenobi[i], keys, &buffer)
+		add(message.Skywalker[i], keys, &buffer)
+		add(message.Sato[i], keys, &buffer)
 	}
 
 	return strings.TrimRight(buffer.String(), " "), nil

@@ -83,8 +83,8 @@ func (controller *GenericController) PostTopSecretSplit(w http.ResponseWriter, r
 	var wg sync.WaitGroup
 	wg.Add(total)
 
-	go controller.MessageService.AddMessagePart(&wg, request.Message.Kenobi, request.Message.Skywalker, request.Message.Sato)
-	go controller.PositionService.AddDistancePart(&wg, request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
+	go controller.MessageService.AddMessagePart(&wg, request.Message)
+	go controller.PositionService.AddDistancePart(&wg, request.Distance)
 
 	wg.Wait()
 	w.WriteHeader(http.StatusOK)
@@ -106,14 +106,16 @@ func (controller *GenericController) PostTopSecret(w http.ResponseWriter, r *htt
 	var getPositionError error
 
 	go func() {
-		x, y, getPositionError = controller.PositionService.GetPosition(&wg, request.Distance.Kenobi, request.Distance.Skywalker, request.Distance.Sato)
+		x, y, getPositionError = controller.PositionService.GetPosition(&wg, request.Distance)
 	}()
 
 	var message string
 	var getMessagerror error
 
+	fmt.Printf("*model*", &request.Message)
+
 	go func() {
-		message, getMessagerror = controller.MessageService.GetMessage(&wg, request.Message.Kenobi, request.Message.Skywalker, request.Message.Sato)
+		message, getMessagerror = controller.MessageService.GetMessage(&wg, request.Message)
 	}()
 
 	wg.Wait()
